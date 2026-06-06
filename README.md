@@ -1,6 +1,6 @@
-# Nettside-Mal
+# Nettside Mal
 
-En mal/template for å bygge moderne nettsider med React, TypeScript og Tailwind CSS v4. Dette er en generell mal basert på [Katta-Helse](https://github.com/THEBEST7192/Katta-Helse) - som ble opprinnelig utviklet for en halvårs vurderingsoppgave.
+En moderne nettside mal med React, TypeScript og Tailwind CSS v4.
 
 ## Funksjoner
 
@@ -22,14 +22,79 @@ En mal/template for å bygge moderne nettsider med React, TypeScript og Tailwind
 
 **For lokal utvikling:**
 - Node.js installert
-- En MySQL-database (f.eks. via Docker, eller lokalt)
+- En MySQL-database (f.eks. via Docker)
 
 **For Docker:**
 ```bash
-# Installer avhengigheter på Ubuntu/Debian
+# Installer avheniheter i WSL/Ubuntu/macOS
 sudo apt update
-sudo apt install -y docker.io docker-compose nodejs npm
+sudo apt install -y nodejs npm
 ```
+
+
+### Installer Docker
+#### Debian
+Legg til Docker APT repository
+```
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+
+Installer Docker
+```
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+#### Ubuntu
+Legg til Docker APT repository
+```
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: $(. /etc/os-release && echo "$VERSION_CODENAME")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+Installer Docker
+```
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+#### Windows/macOS
+For windows så kan du bruke WSL og bruke Ubuntu/Debian stegene
+
+Du kan bruke Docker Desktop for bpde Windows og MacOS
+
+For mer detaljer se her:
+https://docs.docker.com/desktop/
 
 ### Oppsett av Backend
 
@@ -42,16 +107,16 @@ sudo apt install -y docker.io docker-compose nodejs npm
    npm install
    ```
 3. Konfigurer miljøvariabler:
-   - Endre navn på `.env.example` til `.env`
-   - Oppdater `DATABASE_URL` med din MySQL-tilkoblingsstreng.
+   - For lokal utvikling, kopier `.env.development.example` til `.env.development`.
+   - For Docker, kopier `.env.docker.example` til `.env`.
+   - Sett `DB_ROOT_PASSWORD` til MySQL root-passordet.
    - For å generere krypteringsnøkkel kan du bruke `openssl rand -base64 32` (kan kjøres i WSL) og lagre verdien i `MESSAGE_ENCRYPTION_KEY`.
    - Valgfritt: sett `RESERVATION_RETENTION_DAYS` for hvor lenge gamle reservasjoner lagres (standard: `1` dag).
      - `0` = slett umiddelbart dagen etter behandling.
      - `1` = behold i 1 dag.
      - `30` = behold i en måned.
-   - Standard port er `6767`.
 4. Opprett en lege i databasen:
-   - Siden systemet ikke har en offentlig registreringsside, må den første legen legges til manuelt i `doctors`-tabellen.
+   - Siden systemet ikke har en offentlig registreringsside, må den første legen legges til manuelt i `doctors`-tabellen, du kan bruke server\create-doctor.js for å opprete en doktor bruker.
    - Passordet må hashes med bcrypt.
 5. Start serveren:
    ```bash
@@ -92,7 +157,7 @@ cp .env.docker.example .env
 **2. Konfigurer miljøvariabler:**
 ```bash
 # PÅKREVD: Database passord
-DB_PASSWORD=ditt_sikre_passord_her
+DB_ROOT_PASSWORD=ditt_sikre_passord_her
 
 # PÅKREVD: Krypteringsnøkkel
 MESSAGE_ENCRYPTION_KEY=din_base64_nøkkel_her
@@ -112,7 +177,7 @@ openssl rand -base64 32
 
 **3. Start applikasjonen:**
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **Tilgang:**
@@ -123,14 +188,13 @@ docker-compose up -d
 
 ### Miljøvariabler
 
-**VIKTIG:** Miljøvariabler skal IKKE bakes inn i Docker-image. De settes når container startes.
 
-#### PÅKREDEDE variabler:
-- `DB_PASSWORD` - Database passord
+#### PÅKREDE variabler:
+- `DB_ROOT_PASSWORD` - MySQL root-passord
 - `MESSAGE_ENCRYPTION_KEY` - Base64 krypteringsnøkkel (32 bytes)
 
 #### VALGFRIE variabler:
-- `RESERVATION_RETENTION_DAYS` - Dager for å beholde reservasjoner (default: 1)
+- `RESERVATION_RETENTION_DAYS` - Dager for å beholde reservasjoner (standard: 1)
 
 ---
 
@@ -138,7 +202,7 @@ docker-compose up -d
 
 ```bash
 # PÅKREVD: Database passord
-DB_PASSWORD=ditt_sterke_passord_her
+DB_ROOT_PASSWORD=ditt_sterke_passord_her
 
 # PÅKREVD: Krypteringsnøkkel (generert med: openssl rand -base64 32)
 MESSAGE_ENCRYPTION_KEY=din_base64_krypteringsnøkkel_her
@@ -157,8 +221,8 @@ VITE_API_URL=http://localhost:6767
 - Tabeller blir opprettet automatisk når Docker container starter
 
 **Database konfigurasjon:**
-- **Produksjon**: MySQL på port 3306, database navn: `nettside_mal`
-- **Utvikling**: MySQL på port 3307, database navn: `nettside_mal_dev`
+- **Produksjon**: MySQL på port 3306, database navn: `nordic_devices_proveeksamen`
+- **Utvikling**: MySQL på port 3307, database navn: `nordic_devices_proveeksamen_dev`
 
 ### Opprette Første Lege
 

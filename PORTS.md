@@ -62,4 +62,4 @@ Utviklings- og produksjonsmiljøer bruker forskjellige porter for å unngå konf
 - **Frontend**: Utvikling (5173) vs Prod (8001)
 - **Backend**: Utvikling (6768) vs Prod (6767)
 - **Database**: Utvikling (3307) vs Prod (3306)
-- **Cloudflare Tunnel**: Utvikling (2917) vs Prod (2918)
+- **Cloudflare Tunnel**: Utvikling (2918) vs Prod (2917)
